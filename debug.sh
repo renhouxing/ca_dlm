@@ -1,0 +1,22 @@
+torchrun --nproc_per_node 2 train.py \
+  --seed 3407 \
+  --report_to tensorboard \
+  --ddp_timeout 3600 \
+  --remove_unused_columns False \
+  --output_dir runs/Debug \
+  --model_cfg data/LLaDA-8B-Instruct \
+  --train_file data/test.jsonl \
+  --max_steps 100 \
+  --save_steps 100 \
+  --max_len 2048 \
+  --logging_steps 10 \
+  --learning_rate 2e-5 \
+  --lr_scheduler_type cosine \
+  --per_device_train_batch_size 1 \
+  --gradient_accumulation_steps 1 \
+  --bf16 \
+  --do_train \
+  --pad_len 8 \
+  --attn_coef 0.1 \
+  --lora \
+  --attn_layer 0 
