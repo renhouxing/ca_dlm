@@ -55,7 +55,7 @@ def get_model(args):
 
     config = AutoConfig.from_pretrained(
         args.model_cfg,
-        _attn_implementation="flash_attention_2",
+        _attn_implementation="eager",
     )
 
     if args.attn_coef > 0 and args.attn_layer is not None:

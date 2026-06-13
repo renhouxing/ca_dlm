@@ -5,9 +5,8 @@ myrun() {
 }
 
 DIRS=(
-    "LLaDA-Lora-Full-New_all_1e-06"
-    "LLaDA-Lora-Full-New_all_1e-04"
-    "LLaDA-Lora-Full-New_all_1e-05"
+    "LLaDA-Lora-Full-0_all_5e-04"
+    "LLaDA-Lora-Full-0_all_1e-04"
 )
 
 STATE_DIR="/tmp/dir-watch-once"
@@ -19,7 +18,7 @@ run_commands() {
 
     echo "Eval $dir"
 
-    for step in 4 2; do
+    for step in 8 4 2; do
         for task in humaneval_instruct mbpp_instruct gsm8k_cot minerva_math mmlu_pro gpqa_main_cot_zeroshot ifeval; do
             case "$task" in
                 humaneval_instruct|mbpp_instruct)

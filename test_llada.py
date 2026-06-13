@@ -64,9 +64,9 @@ class AttnMaskLM(LM):
 
         config = AutoConfig.from_pretrained(
             pretrained,
-            _attn_implementation="eager",
+            _attn_implementation="flash_attention_2",
         )
-        config.attn_layer = 1000
+        config.attn_layer = [0]
 
         self.model = AutoModelForCausalLM.from_pretrained(
             pretrained,
