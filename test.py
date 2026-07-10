@@ -34,6 +34,7 @@ class AttnMaskLM(LM):
         top_p=0.9,
         device="cuda",
         dtype="bfloat16",
+        attn_layer=None,
         **kwargs,
     ):
         super().__init__()
@@ -66,7 +67,10 @@ class AttnMaskLM(LM):
             pretrained,
             _attn_implementation="flash_attention_2",
         )
-        config.attn_layer = 1000
+
+        if attn_layer is not None:
+            attn_layer = str(attn_layer)
+            config.attn_layer = [int(x) for x in attn_layer.split(".")]
 
         self.model = AutoModelForCausalLM.from_pretrained(
             pretrained,
@@ -150,7 +154,6 @@ class AttnMaskLM(LM):
             if 'Dream' in self.pretrained:
                 if req.task_name in ['humaneval_instruct', 'mbpp_instruct']:
                     context = context[:-len("<|im_end|>\n")]
-                    print(context.encode())
             else:
                 if req.task_name in ['humaneval_instruct', 'mbpp_instruct']:
                     context = context[:-len("<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n")]
@@ -377,7 +380,8 @@ class AttnMaskLM(LM):
         answer_mask,
         pred_this_step,
     ):
-        attn_weights = torch.concat(attn_weights, dim=0).mean(dim=0).mean(dim=0)
+        if attn_weights:
+            attn_weights = torch.concat(attn_weights, dim=0).mean(dim=0).mean(dim=0)
 
         curr_token_ids, probs = self.sample(
             logits,
@@ -420,26 +424,7 @@ class AttnMaskLM(LM):
 
             scores = torch.gather(probs, dim=-1, index=curr_token_ids.unsqueeze(-1)).squeeze(-1)
             scores[curr_token_ids == self.pad_id] = -torch.inf
-            scores = scores[answer_mask]
-            
-            weights = weights * scores
-
-            corr = corr / (corr.sum(dim=1, keepdim=True) + 1e-8)
-
-            selected = self.select_tokens(weights, corr, m=pred_this_step)
-            pred_positions = torch.where(answer_mask)[0][selected]
-        
-        elif score_mode == "test_2":
-            weights = attn_weights[answer_mask][:, ~answer_mask].sum(dim=1)
-            corr = attn_weights[answer_mask, :][:, answer_mask]
-
-            scores = torch.gather(probs, dim=-1, index=curr_token_ids.unsqueeze(-1)).squeeze(-1)
-            scores[curr_token_ids == self.pad_id] /= 2
-            scores = scores[answer_mask]
-            
-            weights = weights * scores
-
-            corr = corr / (corr.sum(dim=1, keepdim=True) + 1e-8)
+            weights = weights * scores[answer_mask]
 
             selected = self.select_tokens(weights, corr, m=pred_this_step)
             pred_positions = torch.where(answer_mask)[0][selected]
@@ -493,12 +478,12 @@ class AttnMaskLM(LM):
             answer_mask[pred_positions] = False
             input_ids[pred_positions] = curr_token_ids[pred_positions]
 
-            if self.eos_id is not None and self.eos_id in input_ids[input_len:]:
-                eos_positions = (input_ids[input_len:] == self.eos_id).nonzero(as_tuple=True)[0]
-                eos_index = eos_positions[0].item() + input_len
+            # if self.eos_id is not None and self.eos_id in input_ids[input_len:]:
+            #     eos_positions = (input_ids[input_len:] == self.eos_id).nonzero(as_tuple=True)[0]
+            #     eos_index = eos_positions[0].item() + input_len
 
-                if (input_ids[:eos_index] != self.mask_id).all():
-                    break
+            #     if (input_ids[:eos_index] != self.mask_id).all():
+            #         break
 
         return input_ids
 

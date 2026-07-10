@@ -200,9 +200,9 @@ class DreamAttention(nn.Module):
 
         attention_interface: Callable = eager_attention_forward
 
-        need_attn = False
-        if hasattr(self.config, "attn_layer") and self.layer_idx in self.config.attn_layer:
-            need_attn = True
+        need_attn = True
+        if hasattr(self.config, "attn_layer") and self.layer_idx not in self.config.attn_layer:
+            need_attn = False
 
         if not need_attn and self.config._attn_implementation != "eager":
             attention_interface = ALL_ATTENTION_FUNCTIONS[self.config._attn_implementation]

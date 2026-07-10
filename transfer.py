@@ -55,6 +55,6 @@ def convert(state):
     
     return new_state
 
-state = load_model('/mnt/cache/code/models/LLaDA-1.5')
+state = load_model('/mnt/cache/code/models/LLaDA-8B-Base')
 new_state = convert(state)
-save_model(new_state, 'data/LLaDA-1.5')
+save_model(new_state, 'data/LLaDA-8B-Base')

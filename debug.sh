@@ -4,8 +4,8 @@ torchrun --nproc_per_node 2 train.py \
   --ddp_timeout 3600 \
   --remove_unused_columns False \
   --output_dir runs/Debug \
-  --model_cfg data/LLaDA-8B-Instruct \
-  --train_file data/test.jsonl \
+  --model_cfg data/iLLaDA-8B-Instruct \
+  --train_file data/test.jsonl\
   --max_steps 100 \
   --save_steps 100 \
   --max_len 2048 \
@@ -14,9 +14,8 @@ torchrun --nproc_per_node 2 train.py \
   --lr_scheduler_type cosine \
   --per_device_train_batch_size 1 \
   --gradient_accumulation_steps 1 \
+  --deepspeed config/stage_3.json \
   --bf16 \
   --do_train \
   --pad_len 8 \
-  --attn_coef 0.1 \
-  --lora \
-  --attn_layer 0 
+  --attn_coef 0

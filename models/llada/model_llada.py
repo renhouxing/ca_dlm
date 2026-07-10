@@ -207,11 +207,7 @@ class LLaDAAttention(nn.Module):
 
         attention_interface: Callable = eager_attention_forward
 
-        need_attn = False
-        if hasattr(self.config, "attn_layer") and self.layer_idx in self.config.attn_layer:
-            need_attn = True
-
-        if not need_attn and self.config._attn_implementation != "eager":
+        if self.config._attn_implementation != "eager":
             attention_interface = ALL_ATTENTION_FUNCTIONS[self.config._attn_implementation]
 
         attn_output, attn_weights = attention_interface(

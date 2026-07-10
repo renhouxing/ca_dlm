@@ -28,7 +28,7 @@ myrun() {
 
 # humaneval_instruct mbpp_instruct gsm8k_cot minerva_math mmlu_pro gpqa_main_cot_zeroshot ifeval
 
-for step in 8; do
+for step in 4 2; do
     for task in humaneval_instruct mbpp_instruct gsm8k_cot minerva_math mmlu_pro gpqa_main_cot_zeroshot ifeval; do
         case "$task" in
             humaneval_instruct|mbpp_instruct)
@@ -46,7 +46,18 @@ for step in 8; do
             other_args="HF_HOME=/mnt/cache/code/.cache/huggingface"
             ;;
         esac
-    
+
+        # =====================================
+        # Rebuttal
+        # =====================================
+
+        # myrun -g 8 -e dlm -j test_${task} -c "tasks=${task}; pred_per_step=${step}; score_mode=attnAlign; ${other_args} accelerate launch test.py --model attn_dlm --num_fewshot 0 --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks \${tasks} --output_path evals_results_dream/Base_T7/\${tasks}_\${pred_per_step}_\${score_mode} --model_args pretrained=data/Dream-7B-Instruct,lora_path=None,generation_len=${max_tokens},pred_per_step=\${pred_per_step},score_mode=\${score_mode},attn_layer=21.22.23.24.25.26.27"
+
+        # myrun -g 8 -e dlm -j test_${task} -c "tasks=${task}; pred_per_step=${step}; score_mode=attnAlign; ${other_args} accelerate launch test.py --model attn_dlm --num_fewshot 0 --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks \${tasks} --output_path evals_results_dream/Base_B7/\${tasks}_\${pred_per_step}_\${score_mode} --model_args pretrained=data/Dream-7B-Instruct,lora_path=None,generation_len=${max_tokens},pred_per_step=\${pred_per_step},score_mode=\${score_mode},attn_layer=0.1.2.3.4.5.6"
+
+        myrun -g 8 -e dlm -j test_${task} -c "tasks=${task}; lora_path=Dream-Lora-Full_all_1e-02; pred_per_step=${step}; score_mode=attnAlignLogit; ${other_args} accelerate launch test.py --model attn_dlm --num_fewshot 0 --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks \${tasks} --output_path evals_results_dream/\${lora_path}/\${tasks}_\${pred_per_step}_\${score_mode} --model_args pretrained=data/Dream-7B-Instruct,lora_path=runs/\${lora_path}/checkpoint-final,generation_len=${max_tokens},pred_per_step=\${pred_per_step},score_mode=\${score_mode}"
+
+        # myrun -g 8 -e dlm -j test_${task} -c "tasks=${task}; pred_per_step=${step}; score_mode=entropy; ${other_args} accelerate launch test.py --model attn_dlm --num_fewshot 0 --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks \${tasks} --output_path evals_results_dream/Base/\${tasks}_\${pred_per_step}_\${score_mode} --model_args pretrained=data/Dream-7B-Instruct,lora_path=None,generation_len=${max_tokens},temperature=0.1,top_p=0.9,pred_per_step=\${pred_per_step},score_mode=\${score_mode},attn_layer=100"
     
         # =====================================
         # Baseline
@@ -92,22 +103,20 @@ for step in 8; do
         # LLaDA
         # =====================================
 
-        # myrun -g 8 -e dlm -j test_${task} -c "tasks=${task}; pred_per_step=${step}; score_mode=confidence; ${other_args} accelerate launch test.py --model attn_dlm --num_fewshot 0 --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks \${tasks} --output_path evals_results_llada/Base/\${tasks}_\${pred_per_step}_\${score_mode} --model_args pretrained=data/LLaDA-8B-Instruct,lora_path=None,generation_len=${max_tokens},pred_per_step=\${pred_per_step},score_mode=\${score_mode}"
+        # myrun -g 8 -e dlm -j test_${task} -c "tasks=${task}; pred_per_step=${step}; score_mode=confidence; ${other_args} accelerate launch test_llada.py --model attn_dlm --num_fewshot 0 --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks \${tasks} --output_path evals_results_llada/Base-New/\${tasks}_\${pred_per_step}_\${score_mode} --model_args pretrained=data/LLaDA-8B-Instruct,lora_path=None,generation_len=${max_tokens},pred_per_step=\${pred_per_step},score_mode=\${score_mode}"
 
-        # myrun -g 8 -e dlm -j test_${task} -c "tasks=${task}; pred_per_step=${step}; score_mode=attnAlignLogit; ${other_args} accelerate launch test_llada.py --model attn_dlm --num_fewshot 0 --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks \${tasks} --output_path evals_results_llada/Base/\${tasks}_\${pred_per_step}_\${score_mode} --model_args pretrained=data/LLaDA-8B-Instruct,lora_path=None,generation_len=${max_tokens},pred_per_step=\${pred_per_step},score_mode=\${score_mode}"
+        # myrun -g 8 -e dlm -j test_${task} -c "tasks=${task}; pred_per_step=${step}; score_mode=attnAlign; ${other_args} accelerate launch test_llada.py --model attn_dlm --num_fewshot 0 --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks \${tasks} --output_path evals_results_llada/Base/\${tasks}_\${pred_per_step}_\${score_mode} --model_args pretrained=data/LLaDA-8B-Instruct,lora_path=None,generation_len=${max_tokens},pred_per_step=\${pred_per_step},score_mode=\${score_mode}"
 
+        # myrun -g 8 -e dlm -j test_${task} -c "tasks=${task}; pred_per_step=${step}; lora=LLaDA-Lora-Full_all_5e-02; score_mode=attnAlign; ${other_args} accelerate launch test_llada.py --model attn_dlm --num_fewshot 0 --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks \${tasks} --output_path evals_results_llada/\${lora}/\${tasks}_\${pred_per_step}_\${score_mode} --model_args pretrained=data/LLaDA-8B-Instruct,lora_path=runs/\${lora}/checkpoint-final,generation_len=${max_tokens},pred_per_step=\${pred_per_step},score_mode=\${score_mode}"
 
-        myrun -g 8 -e dlm -j test_${task} -c "tasks=${task}; pred_per_step=${step}; lora=LLaDA-Lora-Full-0_all_5e-03; score_mode=attnAlignLogit; ${other_args} accelerate launch test_llada.py --model attn_dlm --num_fewshot 0 --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks \${tasks} --output_path evals_results_llada/\${lora}/\${tasks}_\${pred_per_step}_\${score_mode} --model_args pretrained=data/LLaDA-8B-Instruct,lora_path=runs/\${lora}/checkpoint-final,generation_len=${max_tokens},pred_per_step=\${pred_per_step},score_mode=\${score_mode}"
-
-        myrun -g 8 -e dlm -j test_${task} -c "tasks=${task}; pred_per_step=${step}; lora=LLaDA-Lora-Full-0_all_1e-03; score_mode=attnAlignLogit; ${other_args} accelerate launch test_llada.py --model attn_dlm --num_fewshot 0 --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks \${tasks} --output_path evals_results_llada/\${lora}/\${tasks}_\${pred_per_step}_\${score_mode} --model_args pretrained=data/LLaDA-8B-Instruct,lora_path=runs/\${lora}/checkpoint-final,generation_len=${max_tokens},pred_per_step=\${pred_per_step},score_mode=\${score_mode}"
-
-        myrun -g 8 -e dlm -j test_${task} -c "tasks=${task}; pred_per_step=${step}; lora=LLaDA-Lora-Full-0_all_1e-02; score_mode=attnAlignLogit; ${other_args} accelerate launch test_llada.py --model attn_dlm --num_fewshot 0 --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks \${tasks} --output_path evals_results_llada/\${lora}/\${tasks}_\${pred_per_step}_\${score_mode} --model_args pretrained=data/LLaDA-8B-Instruct,lora_path=runs/\${lora}/checkpoint-final,generation_len=${max_tokens},pred_per_step=\${pred_per_step},score_mode=\${score_mode}"
     done
 done
 
-# tasks=mbpp_instruct; lora_path=LLaDA-Lora-Full_all_1e-02; max_tokens=512; pred_per_step=8; score_mode=attnAlign; ${other_args} accelerate launch --num_processes=1 test.py --model attn_dlm --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks ${tasks} --output_path evals_results_debug/${lora_path}/${tasks}_${pred_per_step}_${score_mode} --model_args pretrained=data/LLaDA-8B-Instruct,lora_path=runs/${lora_path}/checkpoint-final,generation_len=${max_tokens},pred_per_step=${pred_per_step},score_mode=${score_mode} --limit 1
+# tasks=ifeval; max_tokens=512; pred_per_step=8; score_mode=attnAlign; HF_HOME=/mnt/cache/code/.cache/huggingface accelerate launch --num_processes=1 test.py --model attn_dlm --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks ${tasks} --output_path evals_results_debug/Base/${tasks}_${pred_per_step}_${score_mode} --model_args pretrained=data/Dream-7B-Instruct,lora_path=None,generation_len=${max_tokens},pred_per_step=${pred_per_step},score_mode=${score_mode} --limit 5
 
-# tasks=gpqa_main_cot_zeroshot; lora_path=Dream-Lora-Full_all_1e-02; max_tokens=512; pred_per_step=8; score_mode=attnAlign; ${other_args} accelerate launch --num_processes=1 test.py --model attn_dlm --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks ${tasks} --output_path evals_results_debug/${lora_path}/${tasks}_${pred_per_step}_${score_mode} --model_args pretrained=data/Dream-7B-Instruct,lora_path=runs/${lora_path}/checkpoint-final,generation_len=${max_tokens},pred_per_step=${pred_per_step},score_mode=${score_mode} --limit 1
+# tasks=ifeval; lora_path=LLaDA-Lora-Full_all_5e-03; max_tokens=512; pred_per_step=8; score_mode=attnAlign; ${other_args} accelerate launch --num_processes=2 test.py --model attn_dlm --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks ${tasks} --output_path evals_results_debug/${lora_path}/${tasks}_${pred_per_step}_${score_mode} --model_args pretrained=data/LLaDA-8B-Instruct,lora_path=runs/${lora_path}/checkpoint-final,generation_len=${max_tokens},pred_per_step=${pred_per_step},score_mode=${score_mode} --limit 10
+
+# tasks=ifeval; lora_path=Dream-Lora-Full_all_1e-02; max_tokens=512; pred_per_step=8; score_mode=attnAlign; ${other_args} accelerate launch --num_processes=1 test.py --model attn_dlm --batch_size 1 --log_samples --apply_chat_template --confirm_run_unsafe_code --tasks ${tasks} --output_path evals_results_debug/${lora_path}/${tasks}_${pred_per_step}_${score_mode} --model_args pretrained=data/Dream-7B-Instruct,lora_path=runs/${lora_path}/checkpoint-final,generation_len=${max_tokens},pred_per_step=${pred_per_step},score_mode=${score_mode} --limit 5
 
 # python score.py -f Base Dream-Lora-Full_all_1e-02 Dream-Lora
 # python score.py -f Dream-Lora-Full_all_1e-02 Dream-Lora-Full_all_2e-02 Dream-Lora-Full_all_5e-03 Dream-Lora-1024_right_1e-02 Dream-Lora-1024_wrong_1e-02

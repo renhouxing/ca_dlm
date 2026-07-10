@@ -5,9 +5,13 @@ from transformers.models.auto.modeling_auto import MODEL_FOR_CAUSAL_LM_MAPPING
 
 from .llada.model_llada import LLaDAConfig, LLaDAForCausalLM
 from .dream.model_dream import DreamConfig, DreamForCausalLM
+from .illada.model_illada import ILLaDAConfig, ILLaDAForCausalLM
 
 CONFIG_MAPPING.register('llada', LLaDAConfig, True)
 MODEL_FOR_CAUSAL_LM_MAPPING.register(LLaDAConfig, LLaDAForCausalLM, True)
 
 CONFIG_MAPPING.register('dream', DreamConfig, True)
 MODEL_FOR_CAUSAL_LM_MAPPING.register(DreamConfig, DreamForCausalLM, True)
+
+CONFIG_MAPPING.register('illada', ILLaDAConfig, True)
+MODEL_FOR_CAUSAL_LM_MAPPING.register(ILLaDAConfig, ILLaDAForCausalLM, True)

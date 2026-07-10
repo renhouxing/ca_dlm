@@ -91,7 +91,12 @@ def load_score(path, name):
 def score():
     scores = []
 
-    base_name = 'evals_results_llada' if args.llada else 'evals_results_dream'
+    if args.llada:
+        base_name = 'evals_results_llada'
+    elif args.illada:
+        base_name = 'evals_results_illada'
+    else:
+        base_name = 'evals_results_dream'
 
     for lora_name in os.listdir(base_name):
         if args.filter is not None and lora_name not in args.filter:
@@ -99,6 +104,8 @@ def score():
         
         names = set()
         for _name in os.listdir(os.path.join(base_name, lora_name)):
+            if args.method_filter is not None and '_'.join(_name.split('_')[-1:]) not in args.method_filter:
+                continue
             names.add('_'.join(_name.split('_')[-2:]))
         names = list(names)
         
@@ -130,8 +137,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-l', '--llada', action='store_true')
+    parser.add_argument('-i', '--illada', action='store_true')
 
     parser.add_argument('-f', '--filter', nargs='+', default=None)
+
+    parser.add_argument('-mf', '--method_filter', nargs='+', default=None)
 
     args = parser.parse_args()
 

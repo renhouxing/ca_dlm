@@ -109,7 +109,7 @@ def get_files(path):
 
 def tokenize_dataset(args, processor, paths):
 
-    with args.main_process_first(desc="dataset map tokenization", local=False):
+    with args.main_process_first(local=False):
 
         train_sets = []
 

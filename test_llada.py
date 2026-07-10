@@ -64,9 +64,8 @@ class AttnMaskLM(LM):
 
         config = AutoConfig.from_pretrained(
             pretrained,
-            _attn_implementation="flash_attention_2",
+            _attn_implementation="eager",
         )
-        config.attn_layer = [0]
 
         self.model = AutoModelForCausalLM.from_pretrained(
             pretrained,
@@ -151,6 +150,9 @@ class AttnMaskLM(LM):
                 if req.task_name in ['humaneval_instruct', 'mbpp_instruct']:
                     context = context[:-len("<|im_end|>\n")]
                     print(context.encode())
+            elif 'iLLaDA' in self.pretrained:
+                if req.task_name in ['humaneval_instruct', 'mbpp_instruct']:
+                    context = context[:-len("<[EOS]>")]
             else:
                 if req.task_name in ['humaneval_instruct', 'mbpp_instruct']:
                     context = context[:-len("<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n")]
@@ -420,7 +422,7 @@ class AttnMaskLM(LM):
             corr = attn_weights[answer_mask, :][:, answer_mask]
 
             scores = torch.gather(probs, dim=-1, index=curr_token_ids.unsqueeze(-1)).squeeze(-1)
-            scores[curr_token_ids == self.pad_id] /= 2
+            # scores[curr_token_ids == self.pad_id] /= 2
             scores = scores[answer_mask]
             
             weights = weights * scores
